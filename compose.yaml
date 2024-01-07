@@ -30,6 +30,15 @@ services:
     networks:
       - file-upload-network
 
+  scan:
+    hostname: avscan
+    container_name: avscan
+    # build: ./scan/.
+    image: mailu/clamav:latest
+    ports:
+      - "3310:3310"
+    restart: always
+
 #  debezium:
 #    image: debezium/connect:latest
 #    container_name: debezium
