@@ -50,25 +50,25 @@ class StorageService {
         }
             val scanFile = FileScanService().scanFile(arrayOf(file))
             if (scanFile.isEmpty()) {
-            log.error("Could not scan the file")
-        } else {
-            if (scanFile[0].detected) {
-                throw RuntimeException("File is infected with virus")
+                log.error("Could not scan the file")
             } else {
-                log.info("File is clean ${file.originalFilename}")
-                Files.copy(file.inputStream, root.resolve(file.originalFilename!!))
-                val putObjectUsingPresignedUrl = S3ClientComponent().putObjectUsingPresignedUrl(
-                    File(
-                        root.resolve(file.originalFilename!!).toString()
+                if (scanFile[0].detected) {
+                    throw RuntimeException("File is infected with virus")
+                } else {
+                    log.info("File is clean ${file.originalFilename}")
+                    Files.copy(file.inputStream, root.resolve(file.originalFilename!!))
+                    val putObjectUsingPresignedUrl = S3ClientComponent().putObjectUsingPresignedUrl(
+                        File(
+                            root.resolve(file.originalFilename!!).toString()
+                        )
                     )
-                )
-                log.info("File uploaded to S3: ${putObjectUsingPresignedUrl}")
-                if (putObjectUsingPresignedUrl) {
-                    log.info("File uploaded successfully to S3")
-                    Files.delete(root.resolve(file.originalFilename!!))
+                    log.info("File uploaded to S3: ${putObjectUsingPresignedUrl}")
+                    if (putObjectUsingPresignedUrl) {
+                        log.info("File uploaded successfully to S3")
+                        Files.delete(root.resolve(file.originalFilename!!))
+                    }
                 }
             }
-        }
         } catch (e: Exception) {
             throw RuntimeException("Could not store the file. Error: " + e.message)
         }
