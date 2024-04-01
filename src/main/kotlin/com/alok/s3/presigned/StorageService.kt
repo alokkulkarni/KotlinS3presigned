@@ -43,11 +43,11 @@ class StorageService {
     private fun extracted(file: MultipartFile) {
         try {
             if (file.isEmpty) {
-            throw RuntimeException("Failed to store empty file.")
-        }
+                throw RuntimeException("Failed to store empty file.")
+            }
             if (file.size > 10485760) {
-            throw FileSizeLimitExceededException("File size exceeds the limit of 10MB", file.size, 10485760)
-        }
+                 throw FileSizeLimitExceededException("File size exceeds the limit of 10MB", file.size, 10485760)
+             }
             val scanFile = FileScanService().scanFile(arrayOf(file))
             if (scanFile.isEmpty()) {
                 log.error("Could not scan the file")
@@ -62,7 +62,7 @@ class StorageService {
                             root.resolve(file.originalFilename!!).toString()
                         )
                     )
-                    log.info("File uploaded to S3: ${putObjectUsingPresignedUrl}")
+                    log.info("File uploaded to S3: $putObjectUsingPresignedUrl")
                     if (putObjectUsingPresignedUrl) {
                         log.info("File uploaded successfully to S3")
                         Files.delete(root.resolve(file.originalFilename!!))
