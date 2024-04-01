@@ -2,6 +2,7 @@
 
 package com.alok.s3.presigned
 
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -22,7 +23,9 @@ class StorageService {
 
         fun init() {
             try {
-                Files.createDirectory(root)
+                if (!Files.exists(root)) {
+                    Files.createDirectory(root)
+                }
             } catch (e: Exception) {
                 throw RuntimeException("Could not initialize folder for upload!")
             }
@@ -31,6 +34,12 @@ class StorageService {
 
     fun uploadFile(file: MultipartFile) {
         try {
+            if (file.isEmpty) {
+                throw RuntimeException("Failed to store empty file.")
+            }
+            if (file.size > 10485760) {
+                throw FileSizeLimitExceededException("File size exceeds the limit of 10MB", file.size, 10485760)
+            }
             Files.copy(file.inputStream, root.resolve(file.originalFilename!!))
             S3ClientComponent().putObjectUsingPresignedUrl(File(root.resolve(file.originalFilename!!).toString()))
             Files.delete(root.resolve(file.originalFilename!!))
