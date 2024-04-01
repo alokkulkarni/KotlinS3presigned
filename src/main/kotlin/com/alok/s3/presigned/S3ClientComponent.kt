@@ -63,7 +63,7 @@ class S3ClientComponent {
         }
     }
 
-    fun putObjectUsingPresignedUrl(fileToPut: File) {
+    fun putObjectUsingPresignedUrl(fileToPut: File): Boolean {
         try {
            val preSignedUrl = generatePresignedPutUrl(S3_BUCKET_NAME, "${S3_BUCKET_KEY}/${fileToPut.name}")
            val url =  URL(preSignedUrl.url().toExternalForm())
@@ -77,7 +77,7 @@ class S3ClientComponent {
                 HttpResponse.BodyHandlers.ofString())
 
             log.info("Response from PUT request: ${response.body()} : ${response.statusCode()}")
-
+            return response.statusCode() == 200
         } catch (e: URISyntaxException) {
             throw RuntimeException(e)
         } catch (e: IOException) {
